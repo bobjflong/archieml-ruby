@@ -33,7 +33,7 @@ module Archieml
         if match = line.match(COMMAND_KEY)
           self.parse_command_key(match[1].downcase)
 
-        elsif !@is_skipping && (match = line.match(START_KEY)) && (!@stack_scope || @stack_scope[:array_type] != :simple)
+        elsif !@is_skipping && (match = line.match(START_KEY)) && (!@stack_scope || @stack_scope[:array_type] != :simple) && !looks_like_uri?(line)
           self.parse_start_key(match[1], match[2] || '')
 
         elsif !@is_skipping && (match = line.match(ARRAY_ELEMENT)) && @stack_scope && @stack_scope[:array_type] != :complex
@@ -49,6 +49,11 @@ module Archieml
 
       self.flush_buffer!
       return @data
+    end
+
+    def looks_like_uri?(line)
+      uri_regex = /^\s*([A-Za-z0-9\-_\.]+)[ \t\r]*:[ \t\r]*(\/\/)/
+      line.match(uri_regex)
     end
 
     def parse_start_key(key, rest_of_line)
